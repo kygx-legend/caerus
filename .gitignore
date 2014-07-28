@@ -4,3 +4,7 @@
 # binary
 *.out
 *.o
+*.class
+
+# temp
+*.swp

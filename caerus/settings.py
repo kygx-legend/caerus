@@ -46,6 +46,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
 )
 
 ROOT_URLCONF = 'caerus.urls'
@@ -83,6 +84,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+    BASE_DIR + '/statics',
+)
 
 # Templates Path
 

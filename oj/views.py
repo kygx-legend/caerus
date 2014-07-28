@@ -5,37 +5,52 @@ from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-import os
-import subprocess
+import simplejson
+
+from util import *
 
 def home(request):
-  test_file = open(os.getcwd() + '/compiles/test.cpp', 'r')
+  return render_to_response('oj/home.html',
+                            context_instance=RequestContext(request))
+
+def code(request):
+  template_file = open(CODES_DIR + '/test_C.c', 'r')
 
   render_dict = {}
-  render_dict['test_cpp'] = test_file.read()
+  render_dict['template_text'] = template_file.read()
   
-  print test_file.read()
-  test_file.close()
+  template_file.close()
 
-  if request.method == 'POST':
-    return submit(request, render_dict)
-
-  return render_to_response('oj/base.html', render_dict,
+  return render_to_response('oj/code.html', render_dict,
                             context_instance=RequestContext(request))
 
-def submit(request, render_dict):
+def about(request):
+  return render_to_response('oj/about.html',
+                            context_instance=RequestContext(request))
+
+def submit(request):
+  if request.method != 'POST':
+    return render_to_response('oj/code.html',
+                              context_instance=RequestContext(request))
+
   code = request.POST.get('code', '')
-  print code
+  lang = request.POST.get('language', '')
+  lang = transfer(lang)
+  print code, lang, type(lang)
 
-  test_save_file = open(os.getcwd() + '/compiles/test_save.cpp', 'w')
-  test_save_file.write(code)
-  test_save_file.close()
+  file_name = 'test_' + LANGUAGE[lang]
+  save_path = CODES_DIR + '/' + file_name + '.' + POSTFIX[lang]
+  print save_path
 
-  test_save_file_path = os.getcwd() + '/compiles/test_save.cpp'
-  command = ["g++", test_save_file_path, "-o", os.getcwd() + "/compiles/test.out"]
+  save_file = open(save_path, 'w')
+  save_file.write(code)
+  save_file.close()
 
-  child = subprocess.Popen(command, stdout=subprocess.PIPE)
-  print child.communicate()
+  compileit(file_name, save_path, lang)
 
-  return render_to_response('oj/base.html',
+  return render_to_response('oj/code.html',
                             context_instance=RequestContext(request))
+
+def ajax_get_templates(request, language):
+  language = int(language)
+  return HttpResponse(simplejson.dumps({'text': get_templates(language)}))
